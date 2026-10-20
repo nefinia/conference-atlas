@@ -1,0 +1,34 @@
+date,start,end,room,session,kind,title,speakers,affiliations,themes,session_start,session_end,abstract,id
+2027-05-10,09:00,09:30,Main Auditorium,,plenary,Opening,,,,,,,
+2027-05-10,09:30,10:30,Main Auditorium,,keynote,What we know and what we only assume,Ada Okafor,University of Lagos,Foundations,,,"An opening look at the questions the field keeps returning to, and the assumptions that sit under them.",k1
+2027-05-10,10:30,11:00,Foyer,,break,Coffee,,,,,,,
+2027-05-10,11:00,11:20,Main Auditorium,Foundations I,talk,Three ways to state the same question,Mei Tanaka,Kyoto University,Foundations,11:00,12:20,"Comparing how different groups word the central question, and what each wording makes easy or hard.",t1
+2027-05-10,11:00,11:20,Room B,Methods I,talk,Measuring with imperfect instruments,Tomás Rivera,Universidad de Chile,Methods,11:00,12:20,Error models for measurements that cannot be repeated.,t4
+2027-05-10,11:00,11:20,Room C,Applications I,talk,From lab result to clinic,Priya Raman,IISc Bangalore,Applications,11:00,12:20,What it takes for a result to leave the lab.,t7
+2027-05-10,11:20,11:40,Main Auditorium,Foundations I,talk,A small formal framework for comparison,Lukas Brandt,TU Wien,Foundations; Methods,11:00,12:20,A minimal formalism that lets two models be compared on shared ground.,t2
+2027-05-10,11:20,11:40,Room B,Methods I,talk,Open data for slow science,Hanna Virtanen,University of Helsinki,Methods; Society,11:00,12:20,How a shared dataset changed the way three labs plan their work.,t5
+2027-05-10,11:20,11:40,Room C,Applications I,talk,Tools for field teams,Jonas Eriksen,Aarhus University,Applications,11:00,12:20,Lightweight tools that work with poor connectivity.,t8
+2027-05-10,11:40,12:00,Main Auditorium,Foundations I,talk,When definitions disagree,Sana Haddad,American University of Beirut,Foundations,11:00,12:20,A survey of where definitions diverge and why it matters for experiments.,t3
+2027-05-10,11:40,12:00,Room B,Methods I,talk,Replication in practice,Mei Tanaka; Tomás Rivera,Kyoto University; Universidad de Chile,Methods,11:00,12:20,Notes from a joint replication effort across two continents.,t6
+2027-05-10,11:40,12:00,Room C,Applications I,talk,Learning from failed pilots,Priya Raman,IISc Bangalore,Applications; Society,11:00,12:20,"Three pilots that did not work, and what each taught.",t9
+2027-05-10,12:20,13:30,Foyer,,break,Lunch,,,,,,,
+2027-05-10,13:30,14:00,Main Auditorium,Society and ethics,talk,Who gets a seat at the table,Sana Haddad,American University of Beirut,Society,13:30,15:00,Participation and power in research collaborations.,t10
+2027-05-10,13:30,15:00,Room C,,workshop,Building a shared glossary,Lukas Brandt; Jonas Eriksen,TU Wien; Aarhus University,Foundations; Methods,,,A hands-on session to draft terms the whole room can use.,w1
+2027-05-10,14:00,14:30,Main Auditorium,Society and ethics,talk,Writing for the people affected,Hanna Virtanen,University of Helsinki,Society,13:30,15:00,Plain-language reporting as part of the method.,t11
+2027-05-10,15:00,16:30,Foyer,Poster session,poster,A first look at shared vocabularies,Noor Ahmed,University of Cambridge,Foundations,15:00,16:30,,p1
+2027-05-10,15:00,16:30,Foyer,Poster session,poster,Low-cost sensors in the field,Pablo Ferreira,Universidad de Sevilla,Applications,15:00,16:30,,p2
+2027-05-10,15:00,16:30,Foyer,Poster session,poster,Notes on reproducible figures,Ines Duarte,NOVA Lisbon,Methods,15:00,16:30,,p3
+2027-05-10,15:00,16:30,Foyer,Poster session,poster,Community review in small fields,Yusuf Demir,Middle East Technical University,Society,15:00,16:30,,p4
+2027-05-10,15:00,16:30,Foyer,Poster session,poster,Teaching with open datasets,Katarzyna Nowak,University of Warsaw,Applications; Society,15:00,16:30,,p5
+2027-05-10,15:00,16:30,Foyer,Poster session,poster,Modelling with partial information,Ravi Menon,IIT Madras,Methods; Foundations,15:00,16:30,,p6
+2027-05-11,09:00,10:00,Main Auditorium,,keynote,Looking ahead,Elena Costa,Universidade do Porto,Society; Foundations,,,Where the next five years of work might go.,k2
+2027-05-11,10:00,10:30,Foyer,,break,Coffee,,,,,,,
+2027-05-11,10:30,10:50,Main Auditorium,Foundations II,talk,Priors we forgot we had,Lukas Brandt,TU Wien,Foundations,10:30,12:10,Making hidden assumptions visible in model design.,t12
+2027-05-11,10:30,10:50,Room B,Methods II,talk,Pipelines you can read,Jonas Eriksen,Aarhus University,Methods; Applications,10:30,12:10,Analysis pipelines written to be read by others.,t16
+2027-05-11,10:50,11:10,Main Auditorium,Foundations II,talk,A case for slower definitions,Mei Tanaka,Kyoto University,Foundations,10:30,12:10,Why settling terms late can help.,t13
+2027-05-11,10:50,11:10,Room B,Methods II,talk,Sampling for small groups,Tomás Rivera,Universidad de Chile,Methods,10:30,12:10,Design choices for studies with few participants.,t17
+2027-05-11,11:10,11:30,Main Auditorium,Foundations II,talk,Bridging two vocabularies,Elena Costa,Universidade do Porto,Foundations; Society,10:30,12:10,Translating between two research communities.,t14
+2027-05-11,11:10,11:30,Room B,Methods II,talk,Checks that catch mistakes early,Hanna Virtanen,University of Helsinki,Methods,10:30,12:10,Simple checks that save months of work.,t18
+2027-05-11,11:30,11:50,Main Auditorium,Foundations II,talk,What counts as evidence,Ada Okafor,University of Lagos,Foundations; Methods,10:30,12:10,Evidence standards compared across fields.,t15
+2027-05-11,11:30,11:50,Room B,Methods II,talk,Sharing negative results,Priya Raman,IISc Bangalore,Methods; Society,10:30,12:10,Why and how to publish what did not work.,t19
+2027-05-11,12:10,12:40,Main Auditorium,,plenary,Closing,,,,,,,

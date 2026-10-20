@@ -1,0 +1,43 @@
+# Cloudflare Worker for the conference app. One worker can serve many conferences.
+# Steps are in docs/worker-setup.md.
+
+name = "conference-worker"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "conference"
+database_id = "REPLACE-WITH-YOUR-D1-ID"   # printed by: npx wrangler d1 create conference
+
+# Daily clean-up: old counters, unused backups, board posts past their retention date.
+[triggers]
+crons = ["17 2 * * *"]
+
+[vars]
+# Model used by the assistant, and what it costs per million tokens in US dollars.
+# The prices only drive the budget cap. Check them against the current price list before the event.
+MODEL = "claude-haiku-5-5"
+PRICE_IN_PER_MTOK = "1"
+PRICE_OUT_PER_MTOK = "5"
+
+# One entry per conference, keyed by conference.id in conference.js.
+#   origins        websites allowed to call the worker (the address your app is served from)
+#   conferenceUrl  where the worker reads the programme for the assistant
+#   budgetUsd      total the assistant may spend, with a 5% safety margin
+#   dailyPerPerson / dailyPerNetwork   questions per day
+#   retentionUntil board posts are deleted after this date (YYYY-MM-DD)
+CONFERENCES = '''{
+  "horizons27": {
+    "origins": ["https://example.org"],
+    "conferenceUrl": "https://example.org/horizons27/conference.js",
+    "budgetUsd": 5,
+    "dailyPerPerson": 8,
+    "dailyPerNetwork": 60,
+    "retentionUntil": "2027-06-15"
+  }
+}'''
+
+# Secrets are set with `npx wrangler secret put NAME`, never written in this file:
+#   ANTHROPIC_API_KEY   for the assistant
+#   ADMIN_KEY           for the admin page and the statistics export

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Organiser page</title>
+<style>
+:root{--bg:#fff;--ink:#2b2b2b;--muted:#68656f;--line:#e5e2ec;--sunk:#f4f2f8;--head:#2b2257;--accent:#008b8b;--warn:#b3261e;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#15131c;--ink:#ebe8f2;--muted:#a39fb2;--line:#332f44;--sunk:#262233;--head:#c7b7ee;--accent:#4cc4c4;--warn:#ff8a80;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+h1{font:400 1.5rem Georgia,serif;color:var(--head);margin:0 0 4px}h2{font:600 1.05rem system-ui;color:var(--head);margin:28px 0 8px}
+.where{color:var(--muted);font-size:.88rem}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:70px}
+button{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.card{border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1;min-width:140px}.row>button{flex:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:2px}
+.msg{padding:8px 12px;border-radius:8px;background:var(--sunk);margin:10px 0}.msg.err{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}td,th{border-top:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.hidden-post{opacity:.55}
+</style>
+</head>
+<body><div class="wrap">
+<h1>Organiser page</h1>
+<p class="where">Use this page to post announcements and move or cancel talks while the conference runs. There are two ways to use it.</p>
+<div class="card">
+  <b>Without a server (simplest)</b>
+  <p class="where" style="margin:4px 0 8px">Write your announcements and changes here, then download a small file called <code>live.json</code> and upload it to your website, in the same folder as <code>index.html</code>. Phones pick it up within a few minutes. Nothing else is needed. This works for any conference.</p>
+  <button class="primary" id="local">Start without a server</button>
+</div>
+<p class="where"><b>With a server.</b> If you set up the optional server (see <code>docs/worker-setup.md</code>), you can publish with one button and no upload. You also get the private feedback, the board moderation and the numbers. Fill in the three boxes below.</p>
+
+<div class="card">
+  <div class="grid">
+    <div><label for="url">Worker address</label><input id="url" placeholder="https://conference-worker.yourname.workers.dev"></div>
+    <div><label for="conf">Conference id</label><input id="conf" placeholder="horizons27"></div>
+  </div>
+  <label for="key" style="margin-top:8px">Admin key</label>
+  <div class="row"><input id="key" type="password" autocomplete="off" placeholder="The ADMIN_KEY you set on the worker"><button class="primary" id="connect">Connect</button></div>
+  <p class="where" style="margin:8px 0 0">No key yet? <button id="mkkey" type="button" style="padding:3px 10px">Make one</button> It writes a long random key in the box above. Copy it into a password manager, then give it to the server once: <code>npx wrangler secret put ADMIN_KEY</code> and paste it when asked.</p>
+  <div id="status" class="msg" hidden></div>
+</div>
+
+<div id="app" hidden>
+  <div id="serverTop"><h2>Overview</h2><div id="summary" class="card where">Loading…</div></div>
+
+  <h2>Announcements</h2>
+  <p class="where">Shown on the Now tab between the start and end time. Times are in the conference time zone (<span id="tz"></span>). Bold and links are allowed: &lt;b&gt;text&lt;/b&gt;.</p>
+  <div id="anns"></div>
+  <div class="row"><button id="addAnn">Add an announcement</button></div>
+
+  <h2>Programme changes</h2>
+  <p class="where">Moves, cancellations and renamed talks. They override the programme in every phone, usually within a few minutes.</p>
+  <div id="chg"></div>
+  <div class="row"><button id="addChg">Add a change</button></div>
+
+  <div class="row" style="margin-top:20px"><button class="primary" id="publish">Publish announcements and changes</button></div>
+  <p class="where" id="pubHelp"></p>
+
+  <div id="serverOnly"><h2>Private feedback</h2><div id="feedback" class="card where">Loading…</div>
+  <h2>Board</h2><div id="board" class="card where">Loading…</div></div>
+</div>
+</div>
+
+<script src="conference.js"></script>
+<script>
+(async function(){
+"use strict";
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let D=null,TZ="UTC",ITEMS=[],ROOMS=[],anns=[],chg=[];
+try{D=window.CONFERENCE||await (await fetch("conference.json",{cache:"no-cache"})).json();TZ=D.conference.timezone;ITEMS=D.items||[];ROOMS=D.rooms||[];$("#conf").value=D.conference.id;$("#url").value=(D.backend&&D.backend.url)||""}catch(e){}
+$("#tz").textContent=TZ;
+const S=k=>{try{return localStorage.getItem("conf.admin."+k)||""}catch(e){return""}}, setS=(k,v)=>{try{localStorage.setItem("conf.admin."+k,v)}catch(e){}};
+if(S("key"))$("#key").value=S("key"); if(S("url")&&!$("#url").value)$("#url").value=S("url");
+
+/* conference time zone <-> a datetime-local box */
+const dtf=new Intl.DateTimeFormat("en-GB",{timeZone:TZ,hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+const parts=ms=>{const o={};for(const p of dtf.formatToParts(ms))o[p.type]=p.value;return o};
+const off=ms=>{const p=parts(ms);return Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute)-Math.floor(ms/60000)*60000};
+function boxToIso(v){if(!v)return"";const[d,t]=v.split("T"),[y,m,dd]=d.split("-").map(Number),[h,mi]=t.split(":").map(Number);const g=Date.UTC(y,m-1,dd,h,mi);let u=g-off(g);u=g-off(u);return new Date(u).toISOString()}
+function isoToBox(iso){const ms=Date.parse(iso);if(isNaN(ms))return"";const p=parts(ms);return`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`}
+
+const say=(m,err)=>{const s=$("#status");s.hidden=!m;s.textContent=m||"";s.className="msg"+(err?" err":"")};
+async function call(op,extra){
+  const r=await fetch($("#url").value.replace(/\/+$/,"")+"/admin",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({key:$("#key").value,conf:$("#conf").value,op,...extra})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||r.statusText);return d}
+
+function drawAnns(){
+  $("#anns").innerHTML=anns.map((a,i)=>`<div class="card"><label>Text</label><textarea data-a="${i}" data-f="text">${esc(a.text)}</textarea>
+    <div class="grid"><div><label>Show from</label><input type="datetime-local" data-a="${i}" data-f="from" value="${esc(isoToBox(a.from))}"></div><div><label>Until</label><input type="datetime-local" data-a="${i}" data-f="until" value="${esc(isoToBox(a.until))}"></div></div>
+    <label style="margin-top:8px">More (optional, shown when people tap More)</label><textarea data-a="${i}" data-f="more">${esc(a.more||"")}</textarea>
+    <div class="row" style="margin-top:8px"><button data-del-a="${i}">Remove</button></div></div>`).join("")||`<p class="where">None yet.</p>`}
+function drawChg(){
+  $("#chg").innerHTML=chg.map((c,i)=>`<div class="card"><label>Talk or session item</label>
+    <select data-c="${i}" data-f="id">${ITEMS.map(it=>`<option value="${esc(it.id)}" ${it.id===c.id?"selected":""}>${esc(it.id)} · ${esc(it.title.slice(0,70))}</option>`).join("")}</select>
+    <div class="grid" style="margin-top:8px"><div><label>New start (HH:MM, optional)</label><input data-c="${i}" data-f="start" value="${esc(c.start||"")}" placeholder="11:05"></div>
+    <div><label>New room (optional)</label><select data-c="${i}" data-f="room"><option value="">Same room</option>${ROOMS.map(r=>`<option value="${esc(r.id)}" ${r.id===c.room?"selected":""}>${esc(r.name)}</option>`).join("")}</select></div></div>
+    <div class="grid" style="margin-top:8px"><div><label>New title (optional)</label><input data-c="${i}" data-f="title" value="${esc(c.title||"")}"></div>
+    <div><label>&nbsp;</label><label style="display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.95rem"><input type="checkbox" style="width:auto" data-c="${i}" data-f="cancelled" ${c.cancelled?"checked":""}> Cancelled</label></div></div>
+    <div class="row" style="margin-top:8px"><button data-del-c="${i}">Remove</button></div></div>`).join("")||`<p class="where">None yet.</p>`}
+
+document.addEventListener("input",e=>{const t=e.target;
+  if(t.dataset.a!==undefined){anns[+t.dataset.a][t.dataset.f]=t.type==="datetime-local"?boxToIso(t.value):t.value}
+  if(t.dataset.c!==undefined){chg[+t.dataset.c][t.dataset.f]=t.type==="checkbox"?t.checked:t.value}});
+document.addEventListener("change",e=>{const t=e.target;if(t.dataset.c!==undefined&&t.tagName==="SELECT"){chg[+t.dataset.c][t.dataset.f]=t.value}});
+document.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.delA!==undefined){anns.splice(+b.dataset.delA,1);drawAnns()}
+  if(b.dataset.delC!==undefined){chg.splice(+b.dataset.delC,1);drawChg()}
+  if(b.dataset.hide){try{await call(b.dataset.show?"show_post":"hide_post",{sid:+b.dataset.hide});loadBoard()}catch(x){say(x.message,true)}}});
+$("#addAnn").onclick=()=>{const now=new Date(),end=new Date(now.getTime()+864e5);anns.push({text:"",from:now.toISOString(),until:end.toISOString()});drawAnns()};
+$("#addChg").onclick=()=>{chg.push({id:ITEMS[0]?ITEMS[0].id:"",start:"",room:"",title:"",cancelled:false});drawChg()};
+let MODE="server";
+$("#local").onclick=async()=>{MODE="local";say("");
+  try{const lv=await (await fetch("live.json",{cache:"no-store"})).json();anns=lv.announcements||[];chg=Object.entries(lv.changes||{}).map(([id,c])=>({id,start:c.start||"",room:c.room||"",title:c.title||"",cancelled:!!c.cancelled}))}catch(e){anns=[];chg=[]}
+  drawAnns();drawChg();$("#serverTop").hidden=true;$("#serverOnly").hidden=true;$("#app").hidden=false;
+  $("#publish").textContent="Download live.json";
+  $("#pubHelp").textContent="Upload the downloaded file to your website, in the same folder as index.html, and replace the old live.json. Phones show the change within a few minutes, or when they open the app.";
+  window.scrollTo(0,document.body.scrollHeight*0.25)};
+$("#publish").onclick=async()=>{
+  const changes={};for(const c of chg){if(!c.id)continue;const o={};if(c.cancelled)o.cancelled=true;if(c.start)o.start=c.start;if(c.room)o.room=c.room;if(c.title)o.title=c.title;if(Object.keys(o).length)changes[c.id]=o}
+  if(MODE==="local"){const body={updated:new Date().toISOString(),announcements:anns.filter(a=>a.text.trim()),changes};
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(body,null,1)],{type:"application/json"}));a.download="live.json";document.body.appendChild(a);a.click();a.remove();
+    say("Downloaded live.json. Now upload it next to index.html on your website.");return}
+  try{const r=await call("set_live",{announcements:anns.filter(a=>a.text.trim()),changes});say("Published. Phones pick it up within a few minutes. "+r.updated)}catch(x){say(x.message,true)}};
+
+async function loadAll(){
+  const s=await call("summary");
+  $("#summary").innerHTML=`Assistant spend: <b>$${(+s.spendUsd).toFixed(2)}</b> of $${s.budgetUsd} · Ratings: <b>${s.ratings.n||0}</b>${s.ratings.avg?` (average ${s.ratings.avg})`:""} · Feedback notes: <b>${s.feedback}</b> · Board posts: <b>${s.boardPosts}</b> · Backups: <b>${s.backups}</b>`;
+  const lv=await call("get_live");anns=lv.announcements||[];chg=Object.entries(lv.changes||{}).map(([id,c])=>({id,start:c.start||"",room:c.room||"",title:c.title||"",cancelled:!!c.cancelled}));drawAnns();drawChg();
+  const fb=await call("list_feedback");$("#feedback").innerHTML=fb.rows.length?`<table>${fb.rows.map(r=>`<tr><td>${esc(new Date(r.at).toLocaleString())}</td><td>${esc(r.text)}${r.contact?`<div class="where">${esc(r.contact)}</div>`:""}</td></tr>`).join("")}</table>`:"No feedback yet.";
+  loadBoard()}
+async function loadBoard(){
+  const b=await call("list_board");$("#board").innerHTML=b.rows.length?`<table>${b.rows.map(r=>`<tr class="${r.hidden?"hidden-post":""}"><td>${esc(r.kind)}${r.reports?`<div class="where">${r.reports} report${r.reports>1?"s":""}</div>`:""}</td><td>${esc(r.text)}<div class="where">${esc(r.name||"Anonymous")}${r.item?" · "+esc(r.item):""}</div></td><td><button data-hide="${r.sid}" ${r.hidden?'data-show="1"':""}>${r.hidden?"Show":"Hide"}</button></td></tr>`).join("")}</table>`:"No posts."}
+$("#mkkey").onclick=()=>{const a=new Uint8Array(24);crypto.getRandomValues(a);const k=[...a].map(x=>"abcdefghijkmnpqrstuvwxyz23456789"[x%32]).join("");const i=$("#key");i.type="text";i.value=k;i.select()};
+$("#connect").onclick=async()=>{setS("key",$("#key").value);setS("url",$("#url").value);say("Connecting…");
+  try{MODE="server";$("#serverTop").hidden=false;$("#serverOnly").hidden=false;await loadAll();$("#app").hidden=false;$("#publish").textContent="Publish announcements and changes";$("#pubHelp").textContent="";say("Connected.")}catch(x){$("#app").hidden=true;say(x.message==="Wrong key"?"That key does not match.":"Could not connect: "+x.message,true)}};
+})();
+</script>
+</body>
+</html>
