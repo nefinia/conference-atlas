@@ -515,7 +515,6 @@ VIEWS.practical=function(){
   return `<section class="stack"><h2>${T.practical}</h2>${arrivalHtml(V)}
     <div class="card">${(C.practical||[]).map(p=>`<details class="acc"><summary>${esc(p.title)}</summary><div>${clean(p.body)}${p.link?` <a href="${esc(p.link)}" target="_blank" rel="noopener noreferrer">More</a>`:""}</div></details>`).join("")||`<span class="where">Nothing listed.</span>`}</div>
     ${cn.email?`<div class="card"><b>Contact</b><div class="where">${esc(cn.name||"Organisers")} · <a href="mailto:${esc(cn.email)}">${esc(cn.email)}</a></div></div>`:""}
-    <div class="card"><b>Share this app</b><div class="where" style="margin:4px 0 8px">${esc(CONF.url||location.href.split("#")[0])}</div><div class="row2"><button class="btn" data-act="share">Share the link</button></div></div>
     ${BACK?feedbackCard():""}
     <div class="card sunk"><b>Privacy</b>${privacyText().map(t=>`<p class="where" style="margin:6px 0 0">${esc(t)}</p>`).join("")}</div></section>`}
 function feedbackCard(){return `<div class="card stack"><b>Tell the organisers</b><div class="where">A private note, read only by the organisers.</div>
@@ -684,7 +683,6 @@ document.addEventListener("click",async e=>{
     case"del-note":{const n=(store.free||[]).find(x=>x.id===el.dataset.id);if(n&&(!n.t.trim()||confirm("Delete this note?"))){store.free=store.free.filter(x=>x.id!==n.id);save();render(true)}break}
     case"event-ics":{const ev=(C.events||[]).find(x=>(x.id||x.title)===el.dataset.id);if(!ev)break;const s=ev.start?toMin(ev.start):0,en=ev.end?toMin(ev.end):s+60;
       download((ev.id||"event")+".ics",makeIcs([{uid:"ev-"+(ev.id||pkey(ev.title)),title:ev.title,start:localToUtc(ev.date,s),end:localToUtc(ev.date,en),where:ev.place,desc:ev.note}]),"text/calendar");break}
-    case"share":{const url=CONF.url||location.href.split("#")[0];try{if(navigator.share)await navigator.share({title:CONF.name,url});else{await navigator.clipboard.writeText(url);toast("Link copied")}}catch(x){}break}
     case"install":showInstall();break;
     case"ask":doAsk(($("#askq")||{}).value);break;
     case"ask-idea":doAsk(el.dataset.q);break;
@@ -723,7 +721,7 @@ function showInstall(){
 
 /* ---------- footer, boot ---------- */
 $("#foot").innerHTML=`<span>Times and rooms follow the official programme${/^https?:\/\//.test(CONF.website||"")?`; more on <a href="${esc(CONF.website)}" target="_blank" rel="noopener noreferrer">the conference website</a>`:""}.</span><br>
-  <span>Everything stays on this device unless you share it. No account, no cookies.</span>${CONF.creditLine?`<br><span>${clean(CONF.creditLine)}</span>`:""}`;
+  <span>Everything stays on this device unless you share it. No account, no cookies.</span>${CONF.creditLine?`<br><span>${clean(CONF.creditLine)}</span>`:""}${CONF.credit===false?"":`<br><span><a href="https://github.com/nefinia/conference-atlas" target="_blank" rel="noopener noreferrer">Conference Atlas</a>, by Sofia Gallego / <a href="https://cosmoventures.fr" target="_blank" rel="noopener noreferrer">CosmoVentures</a> · <a href="https://sofiagallego.com" target="_blank" rel="noopener noreferrer">sofiagallego.com</a></span>`}`;
 {const h=location.hash.slice(1);if(h&&VIEWS[h])store.tab=h}
 if(!(store.day>=0&&store.day<DATES.length))store.day=0;
 {const ph=phase();if(ph.p==="during"&&!params.get("keepday"))store.day=ph.day}

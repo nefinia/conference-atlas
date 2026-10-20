@@ -21,7 +21,7 @@ window.CONFERENCE = {
    "email": "hello@example.org"
   },
   "about": "Open Horizons is a made-up conference used to try the template. Replace this text with two or three plain sentences about your event.",
-  "creditLine": "Made by Sofia Gallego / CosmoVentures"
+  "creditLine": ""
  },
  "look": {
   "accent": "#008b8b",

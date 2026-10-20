@@ -16,7 +16,8 @@ Everything about your conference lives in this one file. The demo file in the fo
 | `venue` | `name`, `address`, `lat`, `lng`, and `map` (an address to a map image, optional). |
 | `contact` | `name` and `email`, shown in Practical. |
 | `about` | Two or three plain sentences. |
-| `creditLine` | The line in the footer. Keep it or write your own. |
+| `creditLine` | Optional. A line of your own at the bottom, for example who organises the event. |
+| `credit` | The app adds a small line at the bottom, "Conference Atlas, by Sofia Gallego / CosmoVentures", with links. Set `"credit": false` to hide it. |
 
 ## look
 

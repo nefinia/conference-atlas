@@ -4,3 +4,4 @@ node_modules/
 conference.generated.js
 *.zip
 .DS_Store
+__pycache__/

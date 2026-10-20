@@ -78,7 +78,7 @@ Made by Sofia Gallego / CosmoVentures. [cosmoventures.fr](https://cosmoventures.
 
 Help with setting it up for your conference is available through cosmoventures.fr.
 
-The footer inside the app carries the line "Made by Sofia Gallego / CosmoVentures". You can keep it or change it in `conference.creditLine`.
+The app adds a small line at the bottom with these links. You can hide it with `"credit": false` in `conference.js`, and add a line of your own in `conference.creditLine`. A kept credit helps other organisers find the project.
 
 ## Licence
 
